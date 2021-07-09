@@ -1,0 +1,46 @@
+version: "3.9"
+services:
+    nginx:
+        build: ./requirements/nginx
+        container_name: nginx
+        volumes:
+        - wordpress:/var/www/html
+        ports:
+        - 443:443
+        restart: always
+        depends_on:
+        - wp
+    wp:
+        build: ./requirements/wordpress
+        container_name: wordpress
+        volumes:
+        - wordpress:/var/www/html
+        restart: always
+        depends_on:
+            db:
+                condition: service_healthy
+        env_file:
+            - .env
+    db:
+        build: ./requirements/mysql
+        container_name: db
+        volumes:
+        - db_data:/var/lib/mysql
+        restart: always
+        healthcheck:
+            test: "exit 0"
+        env_file:
+            - .env
+volumes:
+    wordpress:
+        driver: local
+        driver_opts: 
+            type: none
+            device: /Users/tmiranda/data/wordpress
+            o: bind
+    db_data:
+        driver: local
+        driver_opts: 
+            type: none
+            device: /Users/tmiranda/data/db
+            o: bind      
